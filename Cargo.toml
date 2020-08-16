@@ -7,6 +7,8 @@ exclude = ["*.pdf"]
 license = "MIT OR Apache-2.0"
 description = "Embeded-hal implementation for the PMS700x family of sensors"
 readme = "README.md"
+repository = "https://github.com/icewind1991/pms700x"
+documentation = "https://docs.rs/pms700x"
 
 [dependencies]
 embedded-hal = "0.2"
