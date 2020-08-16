@@ -1,4 +1,4 @@
-#![no_std]
+//#![no_std]
 
 use core::marker::PhantomData;
 use embedded_hal::serial::{Read, Write};
@@ -176,7 +176,7 @@ impl<Error, Serial: Read<u8, Error = Error> + Write<u8, Error = Error>>
 {
     pub fn read(&mut self) -> nb::Result<SensorData, Error> {
         self.reader.fill_data(&mut self.serial)?;
-        if self.reader.length == 0x1c {
+        if self.reader.validate_data() {
             Ok(SensorData::from_raw(&self.reader.data))
         } else {
             Err(nb::Error::WouldBlock)
@@ -234,7 +234,6 @@ impl SensorReader {
         }
     }
 
-    #[allow(dead_code)]
     fn validate_data(&self) -> bool {
         let mut sum = 0;
         for byte in self.data.iter().take(self.length as usize + 2) {
