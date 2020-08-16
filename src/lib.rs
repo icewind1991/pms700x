@@ -32,29 +32,47 @@ const MAX_RESPONSE_SIZE: usize = 32;
 
 #[derive(Debug, Default)]
 pub struct SensorData {
+    /// PM1.0 concentration in µg/m³, corrected for standard atmosphere
+    pm10: u16,
+    /// PM25 concentration in µg/m³, corrected for standard atmosphere
+    pm25: u16,
+    /// PM10 concentration in µg/m³, corrected for standard atmosphere
+    pm100: u16,
+    /// PM1.0 concentration in µg/m³, in current atmosphere
+    pm10_atmos: u16,
+    /// PM25 concentration in µg/m³, in current atmosphere
+    pm25_atmos: u16,
+    /// PM10 concentration in µg/m³, in current atmosphere
+    pm100_atmos: u16,
     /// Number of >0.3µm particles per 0.1L
-    pm03_concentration: u16,
+    pm03_count: u16,
     /// Number of >0.5µm particles per 0.1L
-    pm05_concentration: u16,
+    pm05_count: u16,
     /// Number of >1.0µm particles per 0.1L
-    pm10_concentration: u16,
+    pm10_count: u16,
     /// Number of >2.5µm particles per 0.1L
-    pm25_concentration: u16,
+    pm25_count: u16,
     /// Number of >5.0µm particles per 0.1L
-    pm50_concentration: u16,
+    pm50_count: u16,
     /// Number of >10.0µm particles per 0.1L
-    pm100_concentration: u16,
+    pm100_count: u16,
 }
 
 impl SensorData {
     pub fn from_raw(raw: &[u8; MAX_RESPONSE_SIZE]) -> Self {
         SensorData {
-            pm03_concentration: u16::from_be_bytes([raw[16], raw[17]]),
-            pm05_concentration: u16::from_be_bytes([raw[18], raw[19]]),
-            pm10_concentration: u16::from_be_bytes([raw[20], raw[21]]),
-            pm25_concentration: u16::from_be_bytes([raw[22], raw[23]]),
-            pm50_concentration: u16::from_be_bytes([raw[24], raw[25]]),
-            pm100_concentration: u16::from_be_bytes([raw[26], raw[27]]),
+            pm10: u16::from_be_bytes([raw[4], raw[5]]),
+            pm25: u16::from_be_bytes([raw[6], raw[7]]),
+            pm100: u16::from_be_bytes([raw[8], raw[9]]),
+            pm10_atmos: u16::from_be_bytes([raw[10], raw[11]]),
+            pm25_atmos: u16::from_be_bytes([raw[12], raw[13]]),
+            pm100_atmos: u16::from_be_bytes([raw[14], raw[15]]),
+            pm03_count: u16::from_be_bytes([raw[16], raw[17]]),
+            pm05_count: u16::from_be_bytes([raw[18], raw[19]]),
+            pm10_count: u16::from_be_bytes([raw[20], raw[21]]),
+            pm25_count: u16::from_be_bytes([raw[22], raw[23]]),
+            pm50_count: u16::from_be_bytes([raw[24], raw[25]]),
+            pm100_count: u16::from_be_bytes([raw[26], raw[27]]),
         }
     }
 }
@@ -100,6 +118,7 @@ impl<Error, Serial: Read<u8, Error = Error> + Write<u8, Error = Error>, SensorMo
         }
 
         self.command_writer.write(&mut self.serial)?;
+        self.serial.flush()?;
         if expect_answer {
             self.reader.fill_data(&mut self.serial)?;
         }
@@ -116,16 +135,25 @@ impl<Error, Serial: Read<u8, Error = Error> + Write<u8, Error = Error>, SensorMo
         }
     }
 
+    /// Set the sensor into active mode
     pub fn into_active(mut self) -> Result<Pms700X<Error, Serial, Active>, Error> {
         nb::block!(self.send_command(Command::SetMode, 1, true))?;
         Ok(self.into_mode())
     }
 
+    /// Set the sensor into passive mode
+    ///
+    /// Note that after setting the sensor into passive mode, you should wait about 30-50ms
+    /// before trying to read the sensor data or the sensor will not respond
     pub fn into_passive(mut self) -> Result<Pms700X<Error, Serial, Passive>, Error> {
         nb::block!(self.send_command(Command::SetMode, 0, true))?;
         Ok(self.into_mode())
     }
 
+    /// Set the sensor to sleep or wake it up
+    ///
+    /// After waking up the sensor you should wait about 30s before reading the sensor data to wait
+    /// for the sensor to stabilize
     pub fn set_sleeping(
         &mut self,
         sleeping: Sleep,
