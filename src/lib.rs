@@ -1,5 +1,7 @@
+#![no_std]
+
+use core::marker::PhantomData;
 use embedded_hal::serial::{Read, Write};
-use std::marker::PhantomData;
 
 mod private {
     pub trait Sealed {}
@@ -199,7 +201,6 @@ impl SensorReader {
         let byte = serial.read()?;
         let offset = self.byte_offset;
         self.byte_offset += 1;
-        println!("read {}: {:x}", offset, byte);
         self.data[offset as usize] = byte;
         match (offset, byte) {
             (0, START_HEADER_1) => Err(nb::Error::WouldBlock),
@@ -225,9 +226,6 @@ impl SensorReader {
             (offset, _) => {
                 if offset >= self.length + 3 {
                     self.byte_offset = 0;
-                    if !self.validate_data() {
-                        eprintln!("invalid checksum")
-                    }
                     Ok(())
                 } else {
                     Err(nb::Error::WouldBlock)
@@ -236,6 +234,7 @@ impl SensorReader {
         }
     }
 
+    #[allow(dead_code)]
     fn validate_data(&self) -> bool {
         let mut sum = 0;
         for byte in self.data.iter().take(self.length as usize + 2) {
@@ -306,7 +305,6 @@ impl CommandWriter {
                 6 => self.verify_low,
                 _ => unreachable!(),
             };
-            println!("write {}: {:x}", self.state, write_byte);
             serial.write(write_byte)?;
 
             self.state += 1;
@@ -317,13 +315,5 @@ impl CommandWriter {
         } else {
             Err(nb::Error::WouldBlock)
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

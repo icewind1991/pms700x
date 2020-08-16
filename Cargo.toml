@@ -3,6 +3,9 @@ name = "pms700x"
 version = "0.1.0"
 authors = ["Robin Appelman <robin@icewind.nl>"]
 edition = "2018"
+exclude = ["*.pdf"]
+license = "MIT OR Apache-2.0"
+description = "Read"
 
 [dependencies]
 embedded-hal = "0.2"
