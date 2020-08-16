@@ -5,7 +5,8 @@ authors = ["Robin Appelman <robin@icewind.nl>"]
 edition = "2018"
 exclude = ["*.pdf"]
 license = "MIT OR Apache-2.0"
-description = "Read"
+description = "Embeded-hal implementation for the PMS700x family of sensors"
+readme = "README.md"
 
 [dependencies]
 embedded-hal = "0.2"
