@@ -218,7 +218,7 @@ impl SensorReader {
             }
             (3, length_low_byte) => {
                 self.length = length_low_byte;
-                if self.length > MAX_RESPONSE_SIZE as u8 {
+                if self.length > (MAX_RESPONSE_SIZE - 4) as u8 {
                     self.byte_offset = 0;
                 }
                 Err(nb::Error::WouldBlock)
