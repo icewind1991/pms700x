@@ -35,29 +35,29 @@ const MAX_RESPONSE_SIZE: usize = 32;
 #[derive(Debug, Default)]
 pub struct SensorData {
     /// PM1.0 concentration in µg/m³, corrected for standard atmosphere
-    pm10: u16,
+    pub pm10: u16,
     /// PM25 concentration in µg/m³, corrected for standard atmosphere
-    pm25: u16,
+    pub pm25: u16,
     /// PM10 concentration in µg/m³, corrected for standard atmosphere
-    pm100: u16,
+    pub pm100: u16,
     /// PM1.0 concentration in µg/m³, in current atmosphere
-    pm10_atmos: u16,
+    pub pm10_atmos: u16,
     /// PM25 concentration in µg/m³, in current atmosphere
-    pm25_atmos: u16,
+    pub pm25_atmos: u16,
     /// PM10 concentration in µg/m³, in current atmosphere
-    pm100_atmos: u16,
+    pub pm100_atmos: u16,
     /// Number of >0.3µm particles per 0.1L
-    pm03_count: u16,
+    pub pm03_count: u16,
     /// Number of >0.5µm particles per 0.1L
-    pm05_count: u16,
+    pub pm05_count: u16,
     /// Number of >1.0µm particles per 0.1L
-    pm10_count: u16,
+    pub pm10_count: u16,
     /// Number of >2.5µm particles per 0.1L
-    pm25_count: u16,
+    pub pm25_count: u16,
     /// Number of >5.0µm particles per 0.1L
-    pm50_count: u16,
+    pub pm50_count: u16,
     /// Number of >10.0µm particles per 0.1L
-    pm100_count: u16,
+    pub pm100_count: u16,
 }
 
 impl SensorData {
